@@ -1,0 +1,22 @@
+{
+  "name": "where-is-kim-backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "바닐라코딩 1차 프로젝트 `김대리 어딨어` 백엔드 어플리케이션",
+  "main": "index.js",
+  "repository": "https://github.com/marco0212/where-is-kim-backend.git",
+  "author": "Jeong <inyeop0212@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "morgan": "~1.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
