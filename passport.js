@@ -1,8 +1,16 @@
 import passport from 'passport';
-import { Strategy } from 'passport-local';
+import passportLocal from 'passport-local';
 import User from './model/user';
+import passportJwt from 'passport-jwt'
 
-passport.use(new Strategy(
+const LocalStrategy = passportLocal.Strategy;
+const JwtStrategy = passportJwt.Strategy;
+const jwtOptions = {
+  jwtFromRequest: passportJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: 'your_jwt_secret'
+};
+
+passport.use(new LocalStrategy(
   { usernameField: 'email' },
   async (email, password, done) => {
     try {
@@ -14,8 +22,21 @@ passport.use(new Strategy(
 
       return done(null, user);
     } catch (err) {
-      console.log(err);
       return done(err);
     }
   }
 ));
+
+passport.use(new JwtStrategy(jwtOptions, async (payload, done) => {
+  try {
+    const user = await User.findById(payload.id);
+
+    if (user) {
+      done(null, user);
+    } else {
+      done(null, false);
+    }
+  } catch (err) {
+    done(err);
+  }
+}));
