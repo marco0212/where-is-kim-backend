@@ -16,24 +16,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.get('/', (req, res) => {
-  res.end('Hello?');
+app.post('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+  res.json(req.user);
 });
 
 app.post('/api/auth/login', (req, res) => {
   passport.authenticate('local', { session: false }, (err, user) => {
     if (err) {
-      // Error handling
+      return res.end('Error');
     }
 
     if (!user) {
-      // Incorrect User
+      return res.end('Wrong User');
     }
 
-    req.login(user, {session: false}, (err) => {
+    req.login(user, { session: false }, (err) => {
        if (err) return res.send(err);
 
-       const token = jwt.sign(user.toJSON(), 'your_jwt_secret');
+       const payload = { id: user.id };
+       const token = jwt.sign(payload, 'your_jwt_secret');
 
        return res.json({ token });
     });
