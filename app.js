@@ -20,33 +20,24 @@ app.get('/', (req, res) => {
   res.end('Hello?');
 });
 
-app.post('/api/auth/login', (req, res, next) => {
+app.post('/api/auth/login', (req, res) => {
   passport.authenticate('local', { session: false }, (err, user) => {
-    console.log(err, user);
-    // if (err) {
-    //   // Error handling
-    // }
-
-    // if (!user) {
-    //   // Incorrect User
-    // }
-    if (err || !user) {
-      return res.status(400).json({
-          message: 'Something is not right',
-          user   : user
-      });
+    if (err) {
+      // Error handling
     }
 
-    req.logIn(user, { session: false }, (err) => {
-      if (err) {
-        res.send(err);
-      }
+    if (!user) {
+      // Incorrect User
+    }
 
-      const token = jwt.sign(user.toJSON(), 'your_jwt_secret');
+    req.login(user, {session: false}, (err) => {
+       if (err) return res.send(err);
 
-      return res.json({ user, token });
+       const token = jwt.sign(user.toJSON(), 'your_jwt_secret');
+
+       return res.json({ token });
     });
-  });
+  })(req, res);
 });
 
 module.exports = app;
