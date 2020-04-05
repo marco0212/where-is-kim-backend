@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
@@ -5,6 +6,8 @@ import cors from 'cors';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import User from './model/user';
+
+dotenv.config();
 
 const app = express();
 
@@ -24,20 +27,20 @@ app.post('/', passport.authenticate('jwt', { session: false }), (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   passport.authenticate('local', { session: false }, (err, user) => {
     if (err) {
-      return res.end('Error');
+      return res.json({ result: 'error', err });
     }
 
     if (!user) {
-      return res.end('Wrong User');
+      return res.json({ result: 'wrong account' });
     }
 
     req.login(user, { session: false }, (err) => {
        if (err) return res.send(err);
 
        const payload = { id: user.id };
-       const token = jwt.sign(payload, 'your_jwt_secret');
+       const token = jwt.sign(payload, process.env.JWT_SECRET);
 
-       return res.json({ token });
+       return res.json({ result: { token, user } });
     });
   })(req, res);
 });
