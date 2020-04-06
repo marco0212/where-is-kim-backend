@@ -4,6 +4,7 @@ import logger from "morgan";
 import cors from "cors";
 import passport from "passport";
 import auth from "./api/auth";
+import team from "./api/team";
 const app = express();
 
 import "./db";
@@ -17,5 +18,6 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 app.use("/api/auth", auth);
+app.use("/api/team", team);
 
 module.exports = app;

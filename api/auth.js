@@ -14,7 +14,7 @@ router.post(
 );
 
 router.post("/login", (req, res) => {
-  passport.authenticate("local", { session: false }, (err, user) => {
+  passport.authenticate("local", { session: false }, async (err, user) => {
     if (err) {
       res.status(400);
       return res.json({ result: "error", err });
@@ -24,6 +24,8 @@ router.post("/login", (req, res) => {
       res.status(403);
       return res.json({ result: "wrong account" });
     }
+
+    user = await User.findById(user.id).populate("teams");
 
     req.login(user, { session: false }, (err) => {
       if (err) return res.json(err);
