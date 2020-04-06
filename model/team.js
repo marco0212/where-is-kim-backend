@@ -25,7 +25,7 @@ const schema = mongoose.Schema({
     required: true,
   },
   location: {
-    type: { address: String, latitude: String, longitude: String },
+    type: { latitude: String, longitude: String },
     required: true,
   },
   work_on_time: {
