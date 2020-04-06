@@ -27,7 +27,7 @@ router.post("/new", async (req, res) => {
 
     user.teams.push(newTeam.id);
     await user.save();
-    res.json(newTeam);
+    res.json({ result: newTeam });
   } catch (err) {
     res.status(500);
     res.json({ result: "error", err });
