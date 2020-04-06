@@ -3,7 +3,8 @@ import passportLocalMongoose from 'passport-local-mongoose';
 
 const schema = mongoose.Schema({
   email: String,
-  username: String
+  username: String,
+  teams: [{ type: mongoose.Types.ObjectId, ref: 'Team' }]
 });
 
 schema.plugin(passportLocalMongoose, { usernameField: 'email' });
