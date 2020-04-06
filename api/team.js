@@ -12,9 +12,11 @@ router.post("/new", async (req, res) => {
       workOnTime,
       workOffTime,
     } = req.body;
+    const name = teamName.split(" ").join("-");
     const user = await User.findById(createdBy);
     const newTeam = await Team.create({
-      name: teamName,
+      name,
+      display_name: teamName,
       created_by: user.id,
       location: teamLocation,
       work_on_time: workOnTime,
