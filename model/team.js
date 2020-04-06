@@ -19,13 +19,11 @@ const schema = mongoose.Schema({
     ref: "Team",
     required: true,
   },
-  created_at: {
-    type: Date,
-    default: Date.now,
-    required: true,
-  },
   location: {
-    type: { latitude: String, longitude: String },
+    type: {
+      latitude: { type: String, required: true },
+      longitude: { type: String, required: true },
+    },
     required: true,
   },
   work_on_time: {

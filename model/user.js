@@ -1,12 +1,12 @@
-import mongoose from 'mongoose';
-import passportLocalMongoose from 'passport-local-mongoose';
+import mongoose from "mongoose";
+import passportLocalMongoose from "passport-local-mongoose";
 
 const schema = mongoose.Schema({
-  email: String,
-  username: String,
-  teams: [{ type: mongoose.Types.ObjectId, ref: 'Team' }]
+  email: { type: String, unique: true, required: true },
+  username: { type: String, unique: true, required: true },
+  teams: [{ type: mongoose.Types.ObjectId, ref: "Team" }],
 });
 
-schema.plugin(passportLocalMongoose, { usernameField: 'email' });
+schema.plugin(passportLocalMongoose, { usernameField: "email" });
 
-export default mongoose.model('User', schema);
+export default mongoose.model("User", schema);
