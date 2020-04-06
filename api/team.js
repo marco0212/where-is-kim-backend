@@ -34,4 +34,24 @@ router.post("/new", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const teamId = req.params.id;
+    const deletedTeam = await Team.findByIdAndDelete(teamId);
+    const teamUserIds = deletedTeam.participants;
+
+    for (let i = 0; i < teamUserIds.length; i++) {
+      const user = await User.findById(teamUserIds[i]);
+      const targetTeamIndex = user.teams.indexOf(teamId);
+
+      user.teams.splice(targetTeamIndex, 1);
+      await user.save();
+    }
+
+    res.json({ result: deletedTeam });
+  } catch (err) {
+    res.json({ result: "error", err });
+  }
+});
+
 export default router;
