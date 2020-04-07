@@ -5,6 +5,7 @@ import User from "./model/user";
 import passportJwt from "passport-jwt";
 
 dotenv.config();
+
 const LocalStrategy = passportLocal.Strategy;
 const JwtStrategy = passportJwt.Strategy;
 
@@ -35,6 +36,3 @@ passport.use(
     }
   })
 );
-
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
