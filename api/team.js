@@ -56,13 +56,33 @@ router.post("/:teamId/invite", async (req, res) => {
     const teamId = req.params.teamId;
     const { memberEmail } = req.body;
     const team = await Team.findById(teamId);
-    const payload = { email: memberEmail };
+    const payload = { teamId, email: memberEmail };
     const token = jwt.sign(payload, process.env.JWT_SECRET);
     const result = await sendMail(memberEmail, team.display_name, token);
 
     res.json({ result });
   } catch (err) {
     console.log(err);
+    res.status(500);
+    res.json({ result: "error", err });
+  }
+});
+
+router.post("/verify", async (req, res) => {
+  try {
+    const { token } = req.query;
+    const { teamId, email } = jwt.decode(token);
+    const team = await Team.findById(teamId);
+    const user = await User.findOne({ email });
+
+    user.teams.push(teamId);
+    team.participants.push(user.id);
+
+    await user.save();
+    await team.save();
+
+    res.json({ result: "ok" });
+  } catch (err) {
     res.status(500);
     res.json({ result: "error", err });
   }
