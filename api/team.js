@@ -1,6 +1,8 @@
 import express from "express";
 import Team from "../model/team";
 import User from "../model/user";
+import { sendMail } from "../utils";
+import jwt from "jsonwebtoken";
 const router = express.Router();
 
 router.post("/new", async (req, res) => {
@@ -44,6 +46,23 @@ router.delete("/:id", async (req, res) => {
 
     res.json({ result: deletedTeam });
   } catch (err) {
+    res.status(500);
+    res.json({ result: "error", err });
+  }
+});
+
+router.post("/:teamId/invite", async (req, res) => {
+  try {
+    const teamId = req.params.teamId;
+    const { memberEmail } = req.body;
+    const team = await Team.findById(teamId);
+    const payload = { email: memberEmail };
+    const token = jwt.sign(payload, process.env.JWT_SECRET);
+    const result = await sendMail(memberEmail, team.display_name, token);
+
+    res.json({ result });
+  } catch (err) {
+    console.log(err);
     res.status(500);
     res.json({ result: "error", err });
   }
