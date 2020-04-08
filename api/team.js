@@ -32,11 +32,11 @@ router.post("/new", async (req, res) => {
     res.json({ result: "error", err });
   }
 });
-router.post("/:id/join", async (req, res) => {
+router.post("/:name/join", async (req, res) => {
   try {
-    const teamId = req.params.id;
+    const name = req.params.name;
     const { userId } = req.body;
-    const team = await Team.findById(teamId)
+    const team = await Team.findOne({ name })
       .populate("participants")
       .populate("admins")
       .populate("threads")
