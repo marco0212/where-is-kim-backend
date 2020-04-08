@@ -32,6 +32,31 @@ router.post("/new", async (req, res) => {
     res.json({ result: "error", err });
   }
 });
+router.post("/:id/join", async (req, res) => {
+  try {
+    const teamId = req.params.id;
+    const { userId } = req.body;
+    const team = await Team.findById(teamId)
+      .populate("participants")
+      .populate("admins")
+      .populate("threads")
+      .populate("records");
+
+    if (team.admins.filter((admin) => admin.id === userId).length) {
+      return res.json({ result: "ok", level: "admin", team });
+    } else if (
+      team.participants.filter((participant) => participant.id === userId)
+        .length
+    ) {
+      delete team.records;
+      return res.json({ result: "ok", level: "normal", team });
+    }
+
+    return res.json({ result: "wrong user id" });
+  } catch (err) {
+    res.json({ result: "error", err });
+  }
+});
 
 router.delete("/:id", async (req, res) => {
   try {
