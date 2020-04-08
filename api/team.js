@@ -99,7 +99,7 @@ router.post("/:teamId/onWork/:userId", async (req, res) => {
     const workOnTime = `${moment().format("YYYY-MM-DD")}T${team.work_on_time}`;
     const isLate = moment().isAfter(workOnTime);
     const diff = moment().diff(moment(workOnTime), "minute");
-    let message = `${user.username}이(가) ${
+    const message = `${user.username}이(가) ${
       isLate ? `${diff}분 초과해서 ` : ""
     }출근했습니다.`;
     const record = await Record.create({
@@ -114,9 +114,38 @@ router.post("/:teamId/onWork/:userId", async (req, res) => {
 
     team.records.push(record.id);
     team.threads.push(thread.id);
-
     await team.save();
+    res.json({ result: "ok" });
+  } catch (err) {
+    res.status(500);
+    res.json({ result: "error", err });
+  }
+});
 
+router.post("/:teamId/offWork/:userId", async (req, res) => {
+  try {
+    const { teamId, userId } = req.params;
+    const team = await Team.findById(teamId);
+    const user = await User.findById(userId);
+    const workOffTime = `${moment().format("YYYY-MM-DD")}T${
+      team.work_off_time
+    }`;
+    const isOver = moment().isAfter(workOffTime);
+    const diff = Math.abs(moment().diff(moment(workOffTime), "minute"));
+    const message = `${user.username}이(가) ${diff}분 ${
+      isOver ? "초과해서" : "일찍"
+    } 퇴근했습니다.`;
+    const record = await Record.findOneAndUpdate(
+      { recorded_by: userId, work_off_time: { $exists: false } },
+      { work_off: moment() }
+    );
+    const thread = await Thread.create({
+      record: record.id,
+      text: message,
+    });
+
+    team.threads.push(thread.id);
+    await team.save();
     res.json({ result: "ok" });
   } catch (err) {
     res.status(500);
