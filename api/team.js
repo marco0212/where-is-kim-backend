@@ -1,8 +1,11 @@
 import express from "express";
 import Team from "../model/team";
 import User from "../model/user";
+import Record from "../model/record";
+import Thread from "../model/thread";
 import { sendMail } from "../utils";
 import jwt from "jsonwebtoken";
+import moment from "moment";
 const router = express.Router();
 
 router.post("/new", async (req, res) => {
@@ -79,6 +82,39 @@ router.post("/verify", async (req, res) => {
     team.participants.push(user.id);
 
     await user.save();
+    await team.save();
+
+    res.json({ result: "ok" });
+  } catch (err) {
+    res.status(500);
+    res.json({ result: "error", err });
+  }
+});
+
+router.post("/:teamId/onWork/:userId", async (req, res) => {
+  try {
+    const { teamId, userId } = req.params;
+    const team = await Team.findById(teamId);
+    const user = await User.findById(userId);
+    const workOnTime = `${moment().format("YYYY-MM-DD")}T${team.work_on_time}`;
+    const isLate = moment().isAfter(workOnTime);
+    const diff = moment().diff(moment(workOnTime), "minute");
+    let message = `${user.username}이(가) ${
+      isLate ? `${diff}분 초과해서 ` : ""
+    }출근했습니다.`;
+    const record = await Record.create({
+      team: teamId,
+      recorded_by: userId,
+      is_late: isLate,
+    });
+    const thread = await Thread.create({
+      record: record.id,
+      text: message,
+    });
+
+    team.records.push(record.id);
+    team.threads.push(thread.id);
+
     await team.save();
 
     res.json({ result: "ok" });
