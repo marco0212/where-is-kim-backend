@@ -5,6 +5,7 @@ import cors from "cors";
 import passport from "passport";
 import auth from "./api/auth";
 import team from "./api/team";
+import thread from "./api/thread";
 
 const app = express();
 
@@ -20,5 +21,6 @@ app.use(passport.initialize());
 
 app.use("/api/auth", auth);
 app.use("/api/team", team);
+app.use("/api/thread", thread);
 
 module.exports = app;

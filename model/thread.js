@@ -17,11 +17,7 @@ const schema = mongoose.Schema(
         text: { type: String, required: true },
       },
     ],
-    likes: [
-      {
-        author: { type: mongoose.Types.ObjectId, ref: "User", required: true },
-      },
-    ],
+    likes: [{ type: mongoose.Types.ObjectId, ref: "User", required: true }],
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
