@@ -39,8 +39,10 @@ router.post("/:name/join", async (req, res) => {
     const team = await Team.findOne({ name })
       .populate("participants")
       .populate("admins")
-      .populate("threads")
-      .populate("records");
+      .populate({
+        path: "threads",
+        populate: { path: "created_by" },
+      });
 
     if (team.admins.filter((admin) => admin.id === userId).length) {
       return res.json({ result: "ok", level: "admin", team });
@@ -133,8 +135,8 @@ router.post("/:teamId/onWork/:userId", async (req, res) => {
       is_late: isLate,
     });
     const thread = await Thread.create({
-      record: record.id,
       text: message,
+      created_by: userId,
     });
 
     team.records.push(record.id);
@@ -160,15 +162,15 @@ router.post("/:teamId/offWork/:userId", async (req, res) => {
     const message = `${user.username}이(가) ${diff}분 ${
       isOver ? "초과해서" : "일찍"
     } 퇴근했습니다.`;
-    const record = await Record.findOneAndUpdate(
-      { recorded_by: userId, work_off_time: { $exists: false } },
-      { work_off: moment() }
-    );
     const thread = await Thread.create({
-      record: record.id,
+      created_by: userId,
       text: message,
     });
 
+    await Record.findOneAndUpdate(
+      { recorded_by: userId, work_off_time: { $exists: false } },
+      { work_off: moment() }
+    );
     team.threads.push(thread.id);
     await team.save();
     res.json({ result: "ok" });
