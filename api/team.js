@@ -39,6 +39,7 @@ router.post("/:name/join", async (req, res) => {
     const team = await Team.findOne({ name })
       .populate("participants")
       .populate("admins")
+      .populate("records")
       .populate({
         path: "threads",
         populate: { path: "created_by" },
@@ -92,7 +93,6 @@ router.post("/:teamId/invite", async (req, res) => {
 
     res.json({ result });
   } catch (err) {
-    console.log(err);
     res.status(500);
     res.json({ result: "error", err });
   }
@@ -124,6 +124,16 @@ router.post("/:teamId/onWork", async (req, res) => {
     const { userId } = req.body;
     const team = await Team.findById(teamId);
     const user = await User.findById(userId);
+    const notDoneRecord = await Record.findOne({
+      team: teamId,
+      recorded_by: userId,
+      work_off: { $exists: false },
+    });
+
+    if (notDoneRecord) {
+      throw Error("Can't record new One");
+    }
+
     const workOnTime = `${moment().format("YYYY-MM-DD")}T${team.work_on_time}`;
     const isLate = moment().isAfter(workOnTime);
     const diff = moment().diff(moment(workOnTime), "minute");
@@ -156,6 +166,16 @@ router.post("/:teamId/offWork", async (req, res) => {
     const { userId } = req.body;
     const team = await Team.findById(teamId);
     const user = await User.findById(userId);
+    const record = await Record.findOneAndUpdate(
+      { recorded_by: userId, team: teamId, work_off: { $exists: false } },
+      { work_off: moment() },
+      { returnNewDocument: true }
+    );
+
+    if (!record) {
+      throw Error("There is no record on worked");
+    }
+
     const workOffTime = `${moment().format("YYYY-MM-DD")}T${
       team.work_off_time
     }`;
@@ -169,10 +189,6 @@ router.post("/:teamId/offWork", async (req, res) => {
       text: message,
     });
 
-    await Record.findOneAndUpdate(
-      { recorded_by: userId, work_off_time: { $exists: false } },
-      { work_off: moment() }
-    );
     team.threads.push(thread.id);
     await team.save();
     res.json({ result: "ok" });
