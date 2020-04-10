@@ -118,9 +118,10 @@ router.post("/verify", async (req, res) => {
   }
 });
 
-router.post("/:teamId/onWork/:userId", async (req, res) => {
+router.post("/:teamId/onWork", async (req, res) => {
   try {
-    const { teamId, userId } = req.params;
+    const { teamId } = req.params;
+    const { userId } = req.body;
     const team = await Team.findById(teamId);
     const user = await User.findById(userId);
     const workOnTime = `${moment().format("YYYY-MM-DD")}T${team.work_on_time}`;
@@ -149,9 +150,10 @@ router.post("/:teamId/onWork/:userId", async (req, res) => {
   }
 });
 
-router.post("/:teamId/offWork/:userId", async (req, res) => {
+router.post("/:teamId/offWork", async (req, res) => {
   try {
-    const { teamId, userId } = req.params;
+    const { teamId } = req.params;
+    const { userId } = req.body;
     const team = await Team.findById(teamId);
     const user = await User.findById(userId);
     const workOffTime = `${moment().format("YYYY-MM-DD")}T${
