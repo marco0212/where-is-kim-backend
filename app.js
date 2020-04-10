@@ -1,4 +1,6 @@
 import express from "express";
+import http from "http";
+import socketIO from "socket.io";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cors from "cors";
@@ -8,6 +10,8 @@ import team from "./api/team";
 import thread from "./api/thread";
 
 const app = express();
+const server = http.Server(app);
+const io = socketIO(server);
 
 import "./db";
 import "./passport";
@@ -24,4 +28,8 @@ app.use("/api/auth", auth);
 app.use("/api/team", team);
 app.use("/api/thread", thread);
 
-module.exports = app;
+io.on("connection", (socket) => {
+  console.log(socket.id);
+});
+
+module.exports = server;
