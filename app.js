@@ -28,8 +28,19 @@ app.use("/api/auth", auth);
 app.use("/api/team", team);
 app.use("/api/thread", thread);
 
+const teamByName = {};
+
 io.on("connection", (socket) => {
-  console.log(socket.id);
+  socket.on("join team", (teamName, userId) => {
+    if (teamByName[teamByName]) {
+      teamByName[teamByName].push(userId);
+    } else {
+      teamByName[teamByName] = [userId];
+    }
+
+    socket.join(teamName);
+    socket.to(teamName).broadcast.emit("join team", teamByName[teamByName]);
+  });
 });
 
 module.exports = server;
