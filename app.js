@@ -28,18 +28,23 @@ app.use("/api/auth", auth);
 app.use("/api/team", team);
 app.use("/api/thread", thread);
 
-const teamByName = {};
+const roomByName = {};
+const roomBySocketId = {};
 
 io.on("connection", (socket) => {
+  const socketId = socket.id;
+
   socket.on("join team", (teamName, userId) => {
-    if (teamByName[teamByName]) {
-      teamByName[teamByName].push(userId);
+    roomBySocketId[socketId] = teamName;
+
+    if (roomByName[teamName]) {
+      roomByName[teamName].push(userId);
     } else {
-      teamByName[teamByName] = [userId];
+      roomByName[teamName] = [userId];
     }
 
     socket.join(teamName);
-    socket.to(teamName).broadcast.emit("join team", teamByName[teamByName]);
+    socket.to(teamName).broadcast.emit("join team", roomByName[teamName]);
   });
 });
 
