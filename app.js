@@ -11,6 +11,7 @@ const app = express();
 
 import "./db";
 import "./passport";
+import "./utils";
 
 app.use(cors());
 app.use(logger("dev"));

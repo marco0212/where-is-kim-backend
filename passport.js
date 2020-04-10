@@ -1,10 +1,7 @@
-import dotenv from "dotenv";
 import passport from "passport";
 import passportLocal from "passport-local";
 import User from "./model/user";
 import passportJwt from "passport-jwt";
-
-dotenv.config();
 
 const LocalStrategy = passportLocal.Strategy;
 const JwtStrategy = passportJwt.Strategy;

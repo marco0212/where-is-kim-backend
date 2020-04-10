@@ -1,8 +1,8 @@
-import dotent from "dotenv";
 import nodemailer from "nodemailer";
 import sgTransport from "nodemailer-sendgrid-transport";
+import dotenv from "dotenv";
 
-dotent.config();
+dotenv.config();
 
 const options = {
   auth: {
