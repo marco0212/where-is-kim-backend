@@ -28,23 +28,32 @@ app.use("/api/auth", auth);
 app.use("/api/team", team);
 app.use("/api/thread", thread);
 
+const roomById = {};
 const roomByName = {};
-const roomBySocketId = {};
+const socketById = {};
+const userIdById = {};
 
 io.on("connection", (socket) => {
-  const socketId = socket.id;
+  const id = socket.id;
 
-  socket.on("join team", (teamName, userId) => {
-    roomBySocketId[socketId] = teamName;
+  socket.on("join team", (userId, teamName) => {
+    let room = roomByName[teamName];
 
-    if (roomByName[teamName]) {
-      roomByName[teamName].push(userId);
+    if (room) {
+      room.push(id);
     } else {
-      roomByName[teamName] = [userId];
+      room = [id];
+      roomByName[teamName] = room;
     }
 
+    socketById[id] = socket;
+    userIdById[id] = userId;
+    roomById[id] = teamName;
+
     socket.join(teamName);
-    socket.to(teamName).broadcast.emit("join team", roomByName[teamName]);
+    const participants = room.map((id) => userIdById[id]);
+
+    io.in(teamName).emit("join team", participants);
   });
 });
 
