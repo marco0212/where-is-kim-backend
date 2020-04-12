@@ -59,6 +59,12 @@ io.on("connection", (socket) => {
   socket.on("leave team", leaveTeam);
   socket.on("disconnect", leaveTeam);
 
+  socket.on("add thread", () => {
+    const roomName = roomById[id];
+
+    io.in(roomName).emit("add thread");
+  });
+
   function leaveTeam() {
     const roomName = roomById[id];
 
