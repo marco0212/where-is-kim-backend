@@ -38,6 +38,7 @@ const schema = mongoose.Schema({
   admins: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   threads: [{ type: mongoose.Types.ObjectId, ref: "Thread" }],
   records: [{ type: mongoose.Types.ObjectId, ref: "Record" }],
+  thumbnail: { type: String },
 });
 
 export default mongoose.model("Team", schema);

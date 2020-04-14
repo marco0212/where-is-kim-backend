@@ -6,11 +6,30 @@ import Thread from "../model/thread";
 import { sendMail } from "../utils";
 import jwt from "jsonwebtoken";
 import moment from "moment";
+import aws from "aws-sdk";
+import multer from "multer";
+import multerS3 from "multer-s3";
+
 const router = express.Router();
 
-router.post("/new", async (req, res) => {
+const s3 = new aws.S3();
+const bucket = "wik";
+const upload = multer({
+  storage: multerS3({
+    s3,
+    bucket,
+    acl: "public-read",
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: (req, file, cb) => {
+      cb(null, `team/${file.originalname}`);
+    },
+  }),
+});
+
+router.post("/new", upload.single("file"), async (req, res) => {
   try {
     const { teamName, createdBy, location, workOnTime, workOffTime } = req.body;
+    const thumbnail = req.file.location;
     const name = teamName.split(" ").join("-");
     const user = await User.findById(createdBy);
     const newTeam = await Team.create({
@@ -22,6 +41,7 @@ router.post("/new", async (req, res) => {
       work_off_time: workOffTime,
       admins: [user.id],
       participants: [user.id],
+      thumbnail,
     });
 
     user.teams.push(newTeam.id);
