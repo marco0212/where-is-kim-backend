@@ -32,6 +32,7 @@ router.post("/new", async (req, res) => {
     res.json({ result: "error", err });
   }
 });
+
 router.post("/:name/join", async (req, res) => {
   try {
     const name = req.params.name;
@@ -196,6 +197,19 @@ router.post("/:teamId/offWork", async (req, res) => {
     res.status(500);
     res.json({ result: "error", err });
   }
+});
+
+router.post("/:teamId/records", async (req, res) => {
+  const { teamId } = req.params;
+  const { userId } = req.body;
+  const team = await Team.findById(teamId).populate("records");
+  const isAdmin = team.admins.filter((id) => id === userId).length;
+
+  if (!isAdmin) {
+    //throw Error("Unauthenticate");
+  }
+
+  res.json({ result: "ok", records: team.records });
 });
 
 export default router;
