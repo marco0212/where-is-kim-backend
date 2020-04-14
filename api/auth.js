@@ -2,8 +2,25 @@ import jwt from "jsonwebtoken";
 import User from "../model/user";
 import express from "express";
 import passport from "passport";
+import aws from "aws-sdk";
+import multer from "multer";
+import multerS3 from "multer-s3";
 
 const router = express.Router();
+
+const s3 = new aws.S3();
+const bucket = "wik";
+const upload = multer({
+  storage: multerS3({
+    s3,
+    bucket,
+    acl: "public-read",
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: (req, file, cb) => {
+      cb(null, `user/${file.originalname}`);
+    },
+  }),
+});
 
 router.post(
   "/",
@@ -38,13 +55,14 @@ router.post("/login", (req, res) => {
   })(req, res);
 });
 
-router.post("/signup", async (req, res) => {
-  const { username, email, password } = req.body;
-
+router.post("/signup", upload.single("profile"), async (req, res) => {
   try {
+    const { username, email, password } = req.body;
+    const profile = req.file ? req.file.location : "";
     const user = new User({
       username,
       email,
+      profile,
     });
 
     await User.register(user, password);
