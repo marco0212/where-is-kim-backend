@@ -39,7 +39,6 @@ router.post("/:name/join", async (req, res) => {
     const { userId } = req.body;
     const team = await Team.findOne({ name })
       .populate("participants")
-      .populate("admins")
       .populate("records")
       .populate({
         path: "threads",
