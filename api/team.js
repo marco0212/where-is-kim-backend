@@ -29,9 +29,10 @@ const upload = multer({
 router.post("/new", upload.single("file"), async (req, res) => {
   try {
     const { teamName, createdBy, location, workOnTime, workOffTime } = req.body;
-    const thumbnail = req.file.location;
     const name = teamName.split(" ").join("-");
     const user = await User.findById(createdBy);
+    const thumbnail = req.file ? req.file.location : "";
+
     const newTeam = await Team.create({
       name,
       display_name: teamName,
