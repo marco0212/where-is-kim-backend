@@ -28,7 +28,14 @@ const upload = multer({
 
 router.post("/new", upload.single("file"), async (req, res) => {
   try {
-    const { teamName, createdBy, location, workOnTime, workOffTime } = req.body;
+    const {
+      teamName,
+      createdBy,
+      latitude,
+      longitude,
+      workOnTime,
+      workOffTime,
+    } = req.body;
     const name = teamName.split(" ").join("-");
     const user = await User.findById(createdBy);
     const thumbnail = req.file ? req.file.location : "";
@@ -37,7 +44,7 @@ router.post("/new", upload.single("file"), async (req, res) => {
       name,
       display_name: teamName,
       created_by: user.id,
-      location,
+      location: { latitude, longitude },
       work_on_time: workOnTime,
       work_off_time: workOffTime,
       admins: [user.id],
@@ -232,4 +239,20 @@ router.post("/:teamId/records", async (req, res) => {
   res.json({ result: "ok", records: team.records });
 });
 
+router.put("/:teamId/admins", async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const { admins } = req.body;
+    const team = await Team.findByIdAndUpdate(
+      teamId,
+      { admins },
+      { new: true }
+    ).populate("participants");
+
+    res.json({ result: team });
+  } catch (err) {
+    res.status(500);
+    res.json({ result: "error", err });
+  }
+});
 export default router;

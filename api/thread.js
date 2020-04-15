@@ -19,7 +19,7 @@ router.post("/:id/like", async (req, res) => {
     }
 
     await tread.save();
-    res.json({ result: "ok" });
+    res.json({ result: tread });
   } catch (err) {
     res.status(500);
     res.json({ result: "error", err });
@@ -29,13 +29,16 @@ router.post("/:id/like", async (req, res) => {
 router.post("/:id/comment", async (req, res) => {
   try {
     const { id } = req.params;
-    const { text, author } = req.body;
-    const tread = await Thread.findById(id);
-    const comment = { author, text };
+    const { text, userId } = req.body;
+    const tread = await Thread.findById(id).populate({
+      path: "comments",
+      populate: { path: "author" },
+    });
+    const comment = { author: userId, text };
 
     tread.comments.push(comment);
     await tread.save();
-    res.json({ result: "ok" });
+    res.json({ result: tread });
   } catch (err) {
     res.status(500);
     res.json({ result: "error", err });
