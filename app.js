@@ -22,6 +22,10 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
+app.get("/", (req, res, next) => {
+  res.send("Welcome Where is kim Server");
+});
+
 app.use("/api", api);
 
 socketCreator(server);
