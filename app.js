@@ -6,6 +6,7 @@ import cors from "cors";
 import passport from "passport";
 import api from "./api";
 import socketCreator from "./socket";
+import createError from "http-errors";
 
 const app = express();
 const server = http.Server(app);
@@ -24,5 +25,23 @@ app.use(passport.initialize());
 app.use("/api", api);
 
 socketCreator(server);
+
+app.use(function (req, res, next) {
+  next(createError(404));
+});
+
+app.use(function (err, req, res, next) {
+  console.error(err);
+  const { status, name, message } = err;
+
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
+
+  res.status(status || 500);
+  res.json({
+    name,
+    message,
+  });
+});
 
 module.exports = server;
