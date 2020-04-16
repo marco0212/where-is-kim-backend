@@ -164,9 +164,11 @@ router.post("/:teamId/onWork", async (req, res) => {
 
     const workOnTime = `${moment().format("YYYY-MM-DD")}T${team.work_on_time}`;
     const isLate = moment().isAfter(workOnTime);
-    const diff = moment().diff(moment(workOnTime), "minute");
+    const diffMin = moment().diff(moment(workOnTime), "minute");
+    const overTime =
+      diffMin > 60 ? `${Math.floor(diffMin / 60)}시간` : `${diffMin}분`;
     const message = `${user.username}이(가) ${
-      isLate ? `${diff}분 초과해서 ` : ""
+      isLate ? `${overTime} 초과해서 ` : ""
     }출근했습니다.`;
     const record = await Record.create({
       team: teamId,
@@ -208,10 +210,14 @@ router.post("/:teamId/offWork", async (req, res) => {
       team.work_off_time
     }`;
     const isOver = moment().isAfter(workOffTime);
-    const diff = Math.abs(moment().diff(moment(workOffTime), "minute"));
-    const message = `${user.username}이(가) ${diff}분 ${
+
+    const diffMin = Math.abs(moment().diff(moment(workOffTime), "minute"));
+    const overTime =
+      diffMin > 60 ? `${Math.floor(diffMin / 60)}시간` : `${diffMin}분`;
+    const message = `${user.username}이(가) ${overTime} ${
       isOver ? "초과해서" : "일찍"
     } 퇴근했습니다.`;
+
     const thread = await Thread.create({
       created_by: userId,
       text: message,
