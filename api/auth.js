@@ -5,6 +5,7 @@ import passport from "passport";
 import aws from "aws-sdk";
 import multer from "multer";
 import multerS3 from "multer-s3";
+import { CustomError } from "../lib/error";
 
 const router = express.Router();
 
@@ -30,28 +31,30 @@ router.post(
   }
 );
 
-router.post("/login", (req, res) => {
+router.post("/login", (req, res, next) => {
   passport.authenticate("local", { session: false }, async (err, user) => {
-    if (err) {
-      res.status(400);
-      return res.json({ result: "error", err });
+    try {
+      if (err) {
+        return next(err);
+      }
+
+      if (!user) {
+        throw new CustomError(403, "User does not exists");
+      }
+
+      user = await User.findById(user.id).populate("teams");
+
+      req.login(user, { session: false }, (err) => {
+        if (err) return next(err);
+
+        const payload = { id: user.id };
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+
+        return res.json({ result: { token, user } });
+      });
+    } catch (error) {
+      next(error);
     }
-
-    if (!user) {
-      res.status(403);
-      return res.json({ result: "wrong account" });
-    }
-
-    user = await User.findById(user.id).populate("teams");
-
-    req.login(user, { session: false }, (err) => {
-      if (err) return res.json(err);
-
-      const payload = { id: user.id };
-      const token = jwt.sign(payload, process.env.JWT_SECRET);
-
-      return res.json({ result: { token, user } });
-    });
   })(req, res);
 });
 
@@ -69,8 +72,7 @@ router.post("/signup", upload.single("profile"), async (req, res) => {
 
     res.json({ result: "ok" });
   } catch (error) {
-    res.status(400);
-    return res.json({ result: "error", error });
+    next(error);
   }
 });
 
