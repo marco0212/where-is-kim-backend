@@ -5,9 +5,7 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cors from "cors";
 import passport from "passport";
-import auth from "./api/auth";
-import team from "./api/team";
-import thread from "./api/thread";
+import api from "./api";
 
 const app = express();
 const server = http.Server(app);
@@ -24,9 +22,7 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-app.use("/api/auth", auth);
-app.use("/api/team", team);
-app.use("/api/thread", thread);
+app.use("/api", api);
 
 const roomById = {};
 const roomByName = {};
