@@ -1,11 +1,9 @@
 import express from "express";
-import Team from "../model/team";
-import User from "../model/user";
-import Record from "../model/record";
 import Thread from "../model/thread";
+
 const router = express.Router();
 
-router.post("/:id/like", async (req, res) => {
+router.post("/:id/like", async (req, res, next) => {
   try {
     const { id } = req.params;
     const { userId } = req.body;
@@ -20,13 +18,12 @@ router.post("/:id/like", async (req, res) => {
 
     await tread.save();
     res.json({ result: tread });
-  } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+  } catch (error) {
+    next(error);
   }
 });
 
-router.post("/:id/comment", async (req, res) => {
+router.post("/:id/comment", async (req, res, next) => {
   try {
     const { id } = req.params;
     const { text, userId } = req.body;
@@ -40,8 +37,7 @@ router.post("/:id/comment", async (req, res) => {
     await tread.save();
     res.json({ result: tread });
   } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+    next(err);
   }
 });
 

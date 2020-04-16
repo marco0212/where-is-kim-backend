@@ -9,6 +9,8 @@ import moment from "moment";
 import aws from "aws-sdk";
 import multer from "multer";
 import multerS3 from "multer-s3";
+import { checkIsExist } from "../lib/utils";
+import { CustomError } from "../lib/error";
 
 const router = express.Router();
 
@@ -26,7 +28,7 @@ const upload = multer({
   }),
 });
 
-router.post("/new", upload.single("file"), async (req, res) => {
+router.post("/new", upload.single("file"), async (req, res, next) => {
   try {
     const {
       teamName,
@@ -39,7 +41,6 @@ router.post("/new", upload.single("file"), async (req, res) => {
     const name = teamName.split(" ").join("-");
     const user = await User.findById(createdBy);
     const thumbnail = req.file ? req.file.location : "";
-
     const newTeam = await Team.create({
       name,
       display_name: teamName,
@@ -55,13 +56,12 @@ router.post("/new", upload.single("file"), async (req, res) => {
     user.teams.push(newTeam.id);
     await user.save();
     res.json({ result: newTeam });
-  } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+  } catch (error) {
+    next(error);
   }
 });
 
-router.post("/:name/join", async (req, res) => {
+router.post("/:name/join", async (req, res, next) => {
   try {
     const name = req.params.name;
     const { userId } = req.body;
@@ -73,23 +73,23 @@ router.post("/:name/join", async (req, res) => {
         populate: { path: "created_by" },
       });
 
-    if (team.admins.filter((admin) => admin.id === userId).length) {
-      return res.json({ result: "ok", level: "admin", team });
-    } else if (
-      team.participants.filter((participant) => participant.id === userId)
-        .length
-    ) {
-      delete team.records;
-      return res.json({ result: "ok", level: "normal", team });
-    }
+    const participants = team.participants.map((part) => part.id);
 
-    return res.json({ result: "wrong user id" });
-  } catch (err) {
-    res.json({ result: "error", err });
+    if (checkIsExist(participants, userId)) {
+      if (checkIsExist(team.admins, userId)) {
+        return res.json({ result: "ok", level: "admin", team });
+      } else {
+        return res.json({ result: "ok", level: "normal", team });
+      }
+    } else {
+      throw new CustomError(403, "UnInvited User");
+    }
+  } catch (error) {
+    next(error);
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const teamId = req.params.id;
     const deletedTeam = await Team.findByIdAndDelete(teamId);
@@ -104,13 +104,12 @@ router.delete("/:id", async (req, res) => {
     }
 
     res.json({ result: deletedTeam });
-  } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+  } catch (error) {
+    next(error);
   }
 });
 
-router.post("/:teamId/invite", async (req, res) => {
+router.post("/:teamId/invite", async (req, res, next) => {
   try {
     const teamId = req.params.teamId;
     const { memberEmail } = req.body;
@@ -120,33 +119,33 @@ router.post("/:teamId/invite", async (req, res) => {
     const result = await sendMail(memberEmail, team.display_name, token);
 
     res.json({ result });
-  } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+  } catch (error) {
+    next(error);
   }
 });
 
-router.post("/verify", async (req, res) => {
+router.post("/verify", async (req, res, next) => {
   try {
     const { token } = req.query;
     const { teamId, email } = jwt.decode(token);
     const team = await Team.findById(teamId);
     const user = await User.findOne({ email });
+    const newTeams = [...new Set([...user.teams, teamId])];
+    const newParticipants = [...new Set([...team.participants, user.id])];
 
-    user.teams.push(teamId);
-    team.participants.push(user.id);
+    user.teams = newTeams;
+    team.participants = newParticipants;
 
     await user.save();
     await team.save();
 
     res.json({ result: "ok" });
-  } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+  } catch (error) {
+    next(error);
   }
 });
 
-router.post("/:teamId/onWork", async (req, res) => {
+router.post("/:teamId/onWork", async (req, res, next) => {
   try {
     const { teamId } = req.params;
     const { userId } = req.body;
@@ -159,7 +158,7 @@ router.post("/:teamId/onWork", async (req, res) => {
     });
 
     if (notDoneRecord) {
-      throw Error("Can't record new One");
+      throw new CustomError(400, "Working does not finished");
     }
 
     const workOnTime = `${moment().format("YYYY-MM-DD")}T${team.work_on_time}`;
@@ -182,15 +181,16 @@ router.post("/:teamId/onWork", async (req, res) => {
 
     team.records.push(record.id);
     team.threads.push(thread.id);
+
     await team.save();
+
     res.json({ result: "ok" });
   } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+    next(err);
   }
 });
 
-router.post("/:teamId/offWork", async (req, res) => {
+router.post("/:teamId/offWork", async (req, res, next) => {
   try {
     const { teamId } = req.params;
     const { userId } = req.body;
@@ -203,7 +203,7 @@ router.post("/:teamId/offWork", async (req, res) => {
     );
 
     if (!record) {
-      throw Error("There is no record on worked");
+      throw new CustomError(400, "Can't find on working record");
     }
 
     const workOffTime = `${moment().format("YYYY-MM-DD")}T${
@@ -227,25 +227,11 @@ router.post("/:teamId/offWork", async (req, res) => {
     await team.save();
     res.json({ result: "ok" });
   } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+    next(err);
   }
 });
 
-router.post("/:teamId/records", async (req, res) => {
-  const { teamId } = req.params;
-  const { userId } = req.body;
-  const team = await Team.findById(teamId).populate("records");
-  const isAdmin = team.admins.filter((id) => id === userId).length;
-
-  if (!isAdmin) {
-    //throw Error("Unauthenticate");
-  }
-
-  res.json({ result: "ok", records: team.records });
-});
-
-router.put("/:teamId/admins", async (req, res) => {
+router.put("/:teamId/admins", async (req, res, next) => {
   try {
     const { teamId } = req.params;
     const { admins } = req.body;
@@ -256,9 +242,9 @@ router.put("/:teamId/admins", async (req, res) => {
     ).populate("participants");
 
     res.json({ result: team });
-  } catch (err) {
-    res.status(500);
-    res.json({ result: "error", err });
+  } catch (error) {
+    next(error);
   }
 });
+
 export default router;
