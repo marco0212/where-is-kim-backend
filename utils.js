@@ -13,7 +13,7 @@ const options = {
 
 const client = nodemailer.createTransport(sgTransport(options));
 const inviteEmailCreator = (memberEmail, teamName, token) => {
-  const VERIFY_REQUEST_URL = `http://localhost:3000/verify/${token}`;
+  const VERIFY_REQUEST_URL = `http://localhost:3000/#/verify/${token}`;
 
   return {
     from: "inyeop0212@gmail.com",
