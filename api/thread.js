@@ -27,10 +27,7 @@ router.post("/:id/comment", async (req, res, next) => {
   try {
     const { id } = req.params;
     const { text, userId } = req.body;
-    const tread = await Thread.findById(id).populate({
-      path: "comments",
-      populate: { path: "author" },
-    });
+    const tread = await Thread.findById(id);
     const comment = { author: userId, text };
 
     tread.comments.push(comment);
