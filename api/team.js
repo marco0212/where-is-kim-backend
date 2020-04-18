@@ -185,8 +185,8 @@ router.post("/:teamId/onWork", async (req, res, next) => {
     await team.save();
 
     res.json({ result: "ok" });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -226,8 +226,24 @@ router.post("/:teamId/offWork", async (req, res, next) => {
     team.threads.push(thread.id);
     await team.save();
     res.json({ result: "ok" });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/:teamId/verifyAdmin", async (req, res, next) => {
+  try {
+    const { teamId } = req.params;
+    const { userId } = req.body;
+    const team = await Team.findById(teamId);
+
+    if (checkIsExist(team.admins, userId)) {
+      res.json({ result: "ok" });
+    } else {
+      throw new CustomError(403, "Can't access it");
+    }
+  } catch (error) {
+    next(error);
   }
 });
 
