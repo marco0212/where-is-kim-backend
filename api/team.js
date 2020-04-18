@@ -77,9 +77,9 @@ router.post("/:name/join", async (req, res, next) => {
 
     if (checkIsExist(participants, userId)) {
       if (checkIsExist(team.admins, userId)) {
-        return res.json({ result: "ok", level: "admin", team });
+        return res.json({ result: "ok", isAdmin: true, team });
       } else {
-        return res.json({ result: "ok", level: "normal", team });
+        return res.json({ result: "ok", isAdmin: false, team });
       }
     } else {
       throw new CustomError(403, "UnInvited User");
