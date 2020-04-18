@@ -58,7 +58,7 @@ router.post("/login", (req, res, next) => {
   })(req, res);
 });
 
-router.post("/signup", upload.single("profile"), async (req, res) => {
+router.post("/signup", upload.single("profile"), async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
     const profile = req.file ? req.file.location : "";
