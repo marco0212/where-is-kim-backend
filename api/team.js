@@ -130,8 +130,10 @@ router.post("/verify", async (req, res, next) => {
     const { teamId, email } = jwt.decode(token);
     const team = await Team.findById(teamId);
     const user = await User.findOne({ email });
-    const newTeams = [...new Set([...user.teams, teamId])];
-    const newParticipants = [...new Set([...team.participants, user.id])];
+    const teams = user.teams.map((id) => id.toString());
+    const participants = team.participants.map((id) => id.toString());
+    const newTeams = [...new Set([...teams, teamId])];
+    const newParticipants = [...new Set([...participants, user.id])];
 
     user.teams = newTeams;
     team.participants = newParticipants;
