@@ -7,6 +7,7 @@ export default function (server) {
   const socketById = {};
   const userIdById = {};
 
+  io.listen(3030);
   io.on("connection", (socket) => {
     const id = socket.id;
 
