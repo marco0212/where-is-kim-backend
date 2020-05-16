@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from "express";
 import http from "http";
 import cookieParser from "cookie-parser";
@@ -8,13 +9,15 @@ import routers from "./routers";
 import socketCreator from "./socket";
 import { errorHandler, CustomError } from "./lib/error";
 
+dotenv.config();
+
 const app = express();
 const server = http.Server(app);
 
-import "./db";
 import "./passport";
 import "./lib/utils";
 import "./moment.config";
+import "./db";
 
 app.use(cors());
 app.use(logger("dev"));
