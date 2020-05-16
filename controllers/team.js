@@ -2,10 +2,9 @@ import Team from "../model/team";
 import User from "../model/user";
 import Record from "../model/record";
 import Thread from "../model/thread";
-import { sendMail } from "../utils";
 import jwt from "jsonwebtoken";
 import moment from "moment";
-import { checkIsExist } from "../lib/utils";
+import { sendMail, checkIsExist } from "../lib/utils";
 import { CustomError } from "../lib/error";
 
 export const postNewTeam = async (req, res, next) => {

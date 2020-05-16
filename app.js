@@ -13,7 +13,7 @@ const server = http.Server(app);
 
 import "./db";
 import "./passport";
-import "./utils";
+import "./lib/utils";
 import "./moment.config";
 
 app.use(cors());
