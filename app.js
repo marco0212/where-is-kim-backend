@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cors from "cors";
 import passport from "passport";
-import api from "./api";
+import routers from "./routers";
 import socketCreator from "./socket";
 import { errorHandler, CustomError } from "./lib/error";
 
@@ -22,9 +22,7 @@ app.use(express.json({ limit: "10mb", extended: true }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
-
-app.get("/", (req, res) => res.send("Welcome Where is kim Server"));
-app.use("/api", api);
+app.use(routers);
 
 socketCreator(server);
 
