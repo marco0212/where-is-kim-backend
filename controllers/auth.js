@@ -1,28 +1,28 @@
-import passport from "passport";
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
 import User from '../model/user';
-import jwt from "jsonwebtoken";
-import { CustomError } from "../lib/error";
+import { CustomError } from '../lib/error';
 
 export const login = (req, res, next) => {
-  passport.authenticate("local", { session: false }, async (err, user) => {
+  passport.authenticate('local', { session: false }, async (err, user) => {
     try {
       if (err) {
         return next(err);
       }
 
       if (!user) {
-        throw new CustomError(403, "User does not exists");
+        throw new CustomError(403, 'User does not exists');
       }
 
-      user = await User.findById(user.id).populate("teams");
+      const loggedInUser = await User.findById(user.id).populate('teams');
 
-      req.login(user, { session: false }, (err) => {
-        if (err) return next(err);
+      req.login(loggedInUser, { session: false }, (error) => {
+        if (error) return next(error);
 
-        const payload = { id: user.id };
+        const payload = { id: loggedInUser.id };
         const token = jwt.sign(payload, process.env.JWT_SECRET);
 
-        return res.json({ result: { token, user } });
+        return res.json({ result: { token, loggedInUser } });
       });
     } catch (error) {
       next(error);
@@ -33,16 +33,16 @@ export const login = (req, res, next) => {
 export const signup = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
-    const profile = req.file ? req.file.location : "";
+    const profile = req.file ? req.file.location : '';
     const user = new User({
       username,
       email,
-      profile,
+      profile
     });
 
     await User.register(user, password);
 
-    res.json({ result: "ok" });
+    res.json({ result: 'ok' });
   } catch (error) {
     next(error);
   }
