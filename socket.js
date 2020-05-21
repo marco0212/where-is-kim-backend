@@ -1,6 +1,6 @@
-import socketIO from "socket.io";
+import socketIO from 'socket.io';
 
-export default function (server) {
+export default (server) => {
   const io = socketIO(server);
   const roomById = {};
   const roomByName = {};
@@ -8,10 +8,10 @@ export default function (server) {
   const userIdById = {};
 
   io.listen(3030);
-  io.on("connection", (socket) => {
-    const id = socket.id;
+  io.on('connection', (socket) => {
+    const { id } = socket;
 
-    socket.on("join team", (userId, teamName) => {
+    socket.on('join team', (userId, teamName) => {
       let room = roomByName[teamName];
 
       if (room) {
@@ -26,19 +26,19 @@ export default function (server) {
       roomById[id] = teamName;
 
       socket.join(teamName);
-      const participants = room.map((id) => userIdById[id]);
+      const participants = room.map(id => userIdById[id]);
 
-      io.in(teamName).emit("join team", participants);
+      io.in(teamName).emit('join team', participants);
     });
 
-    socket.on("add thread", () => {
+    socket.on('add thread', () => {
       const roomName = roomById[id];
 
-      io.in(roomName).emit("add thread");
+      io.in(roomName).emit('add thread');
     });
 
-    socket.on("leave team", leaveTeam);
-    socket.on("disconnect", leaveTeam);
+    socket.on('leave team', leaveTeam);
+    socket.on('disconnect', leaveTeam);
 
     function leaveTeam() {
       const roomName = roomById[id];
@@ -52,9 +52,9 @@ export default function (server) {
         delete userIdById[id];
         delete roomById[id];
 
-        const participants = room.map((id) => userIdById[id]);
+        const participants = room.map(id => userIdById[id]);
 
-        socket.to(roomName).broadcast.emit("leave team", participants);
+        socket.to(roomName).broadcast.emit('leave team', participants);
         socket.leave(roomName);
       }
     }

@@ -1,8 +1,8 @@
-import dotenv from "dotenv";
-import passport from "passport";
-import passportLocal from "passport-local";
-import User from "./model/user";
-import passportJwt from "passport-jwt";
+import dotenv from 'dotenv';
+import passport from 'passport';
+import passportLocal from 'passport-local';
+import passportJwt from 'passport-jwt';
+import User from './model/user';
 
 dotenv.config();
 
@@ -11,14 +11,14 @@ const JwtStrategy = passportJwt.Strategy;
 
 passport.use(
   new LocalStrategy(
-    { usernameField: "email", passwordField: "password" },
+    { usernameField: 'email', passwordField: 'password' },
     User.authenticate()
   )
 );
 
 const jwtOptions = {
   jwtFromRequest: passportJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: process.env.JWT_SECRET
 };
 
 passport.use(
