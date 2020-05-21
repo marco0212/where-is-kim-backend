@@ -1,4 +1,4 @@
-import Thread from "../model/thread";
+import Thread from '../model/thread';
 
 export const postLike = async (req, res, next) => {
   try {
