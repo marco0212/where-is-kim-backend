@@ -1,20 +1,20 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const schema = mongoose.Schema({
-  team: { type: mongoose.Types.ObjectId, ref: "Team" },
-  recorded_by: { type: mongoose.Types.ObjectId, ref: "User" },
+  team: { type: mongoose.Types.ObjectId, ref: 'Team' },
+  recorded_by: { type: mongoose.Types.ObjectId, ref: 'User' },
   work_on: {
     type: Date,
     default: Date.now,
-    required: true,
+    required: true
   },
   work_off: {
-    type: Date,
+    type: Date
   },
   is_late: {
     type: Boolean,
-    required: true,
-  },
+    required: true
+  }
 });
 
-export default mongoose.model("Record", schema);
+export default mongoose.model('Record', schema);
