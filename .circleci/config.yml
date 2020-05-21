@@ -24,11 +24,7 @@ jobs:
             - run:
                 name: Deploy to env
                 command: |
-                  if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                      eb deploy WhereIsKim-env-1
-                  else
-                      eb deploy WhereIsKim-env-1
-                  fi
+                  eb deploy
 
 workflows:
   automated-deploy:
