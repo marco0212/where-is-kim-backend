@@ -1,5 +1,7 @@
 # Where is Kim
 
+![preview](./preview.gif)
+
 [https://www.where-is-kim.site](https://www.where-is-kim.site/#/)
 
 ## Introduction
@@ -16,7 +18,7 @@
 
 ```
 git clone https://github.com/marco0212/where-is-kim-backend.git
-cd where-is-kim
+cd where-is-kim-backend
 npm install (or yarn)
 npm start (or yarn)
 ```
